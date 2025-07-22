@@ -1,0 +1,58 @@
+<.header>
+  Posts
+  <:actions>
+    <.link patch={~p"/posts/new"}>
+      <.button>New Post</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<div class="max-w-xl mx-auto space-y-6">
+  <%= for {_id, post} <- @streams.posts do %>
+    <div id="#{post.id}" class="bg-white rounded-xl shadow-md border">
+      <!-- Header: User Info -->
+      <div class="flex items-center p-4">
+        <div class="ml-3">
+          <div class="font-semibold text-gray-900"><%= post.user.email %></div>
+        </div>
+        <div class="ml-12"><%= post.title %></div>
+      </div>
+
+      <!-- Image -->
+      <.link navigate={~p"/posts/#{post}"}>
+        <img src={Blog.Posts.get_post_image_url(post) || "/images/no_image.png"} alt="Post image" class="w-full object-cover max-h-[500px]" />
+      </.link>
+
+      <!-- Description -->
+      <div class="px-4 py-2">
+        <p class="text-gray-800">
+          <span class="font-semibold"><%= post.user.email %></span>
+          <%= post.description %>
+        </p>
+      </div>
+
+
+      <%= if @current_user && @current_user.id == post.user_id do %>
+        <div class="ml-3">
+          <div class="text-sm text-gray-500"><%= post.inserted_at %></div>
+        </div>
+        <div class="px-4 pb-3 text-right space-x-2">
+          <.link patch={~p"/posts/#{post}/edit"} class="text-sm text-blue-500 hover:underline">Edit</.link>
+          <.link phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{post.id}")} data-confirm="Are you sure?" class="text-sm text-blue-500 hover:underline">Delete</.link>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<.modal :if={@live_action in [:new, :edit]} id="post-modal" show on_cancel={JS.patch(~p"/")}>
+  <.live_component
+    module={BlogWeb.PostLive.FormComponent}
+    id={@post.id || :new}
+    title={@page_title}
+    action={@live_action}
+    post={@post}
+    patch={~p"/"}
+    current_user={@current_user}
+  />
+</.modal>

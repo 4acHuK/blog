@@ -20,7 +20,8 @@ defmodule BlogWeb.Router do
   scope "/", BlogWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+#    get "/", PageController, :home
+    live "/", PostLive.Index, :index
   end
 
   # Other scopes may use custom stacks.
@@ -68,6 +69,9 @@ defmodule BlogWeb.Router do
       on_mount: [{BlogWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+      live "/posts/new", PostLive.Index, :new
+      live "/posts/:id/edit", PostLive.Index, :edit
+      live "/posts/:id/show/edit", PostLive.Show, :edit
     end
   end
 
@@ -75,6 +79,13 @@ defmodule BlogWeb.Router do
     pipe_through [:browser]
 
     delete "/users/log_out", UserSessionController, :delete
+
+#    live "/posts", PostLive.Index, :index
+#    live "/posts/new", PostLive.Index, :new
+#    live "/posts/:id/edit", PostLive.Index, :edit
+#
+    live "/posts/:id", PostLive.Show, :show
+#    live "/posts/:id/show/edit", PostLive.Show, :edit
 
     live_session :current_user,
       on_mount: [{BlogWeb.UserAuth, :mount_current_user}] do
