@@ -28,6 +28,9 @@ blog-*.tar
 # Ignore assets that are produced by build tools.
 /priv/static/assets/
 
+# Ignore uploaded post images.
+/priv/static/uploads/post_images/
+
 # Ignore digested assets cache.
 /priv/static/cache_manifest.json
 
