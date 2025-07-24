@@ -6,15 +6,19 @@ defmodule Blog.Posts.Post do
   schema "posts" do
     field :description, :string
     field :title, :string
-    belongs_to :user, Blog.Accounts.User
     field :image, Blog.Uploaders.ImageUploader.Type
+    field :likes_count, :integer
+
+    belongs_to :user, Blog.Accounts.User
+    has_many :post_likes, Blog.Posts.PostLike
+    has_many :liked_users, through: [:post_likes, :user]
 
     timestamps(type: :utc_datetime)
   end
 
   def changeset(post, attrs) do
     post
-    |> cast(attrs, [:title, :description])
+    |> cast(attrs, [:title, :description, :likes_count])
     |> cast_attachments(attrs, [:image], allow_paths: true)
     |> validate_required([:title, :description])
     |> assoc_constraint(:user)

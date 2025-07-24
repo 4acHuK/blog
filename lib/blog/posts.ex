@@ -8,6 +8,7 @@ defmodule Blog.Posts do
   alias Blog.Repo
 
   alias Blog.Posts.Post
+  alias Blog.Posts.PostLike
 
   @doc """
   Returns the list of posts.
@@ -140,7 +141,76 @@ defmodule Blog.Posts do
     Post.changeset(post, attrs)
   end
 
+  @doc """
+  Returns an url to post image.
+
+  ## Examples
+
+      iex> get_post_image_url(post)
+      "/uploads/post_images/live_view_upload-1753212949-541889566120-1.jpeg_post%20with%20image_original.jpeg?v=63920432149"
+
+  """
   def get_post_image_url(post) do
     Blog.Uploaders.ImageUploader.url({post.image, post})
+  end
+
+
+  @doc """
+  Deletes a post's like.
+
+  ## Examples
+
+      iex> like_post(user, post)
+      {:ok, %Post{}}
+
+  """
+  def like_post(user, post) do
+    %PostLike{}
+    |> PostLike.changeset(%{user_id: user.id, post_id: post.id})
+    |> Repo.insert()
+    |> case do
+         {:ok, _like} ->
+           post
+           |> Ecto.Changeset.change(likes_count: post.likes_count + 1)
+           |> Repo.update()
+         {:error, _} = err -> err
+       end
+  end
+
+  @doc """
+  Deletes a post's like.
+
+  ## Examples
+
+      iex> unlike_post(post)
+      {:ok, %Post{}}
+
+  """
+  def unlike_post(user, post) do
+    Repo.get_by(PostLike, user_id: user.id, post_id: post.id)
+    |> case do
+         nil -> {:error, :not_found}
+         like ->
+           Repo.delete(like)
+           post
+           |> Ecto.Changeset.change(likes_count: post.likes_count - 1)
+           |> Repo.update()
+       end
+  end
+
+
+  @doc """
+  Checks if user liked the post
+
+  ## Examples
+
+      iex> liked_by_user?(user, post)
+      true
+      iex> liked_by_user?(user, post)
+      false
+
+  """
+  def liked_by_user?(user, post) do
+    Repo.exists?(from l in PostLike, where: l.user_id == ^user.id and l.post_id == ^post.id)
   end
 end

@@ -8,7 +8,10 @@ defmodule Blog.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
+
     has_many :posts, Blog.Posts.Post
+    has_many :post_likes, Blog.Posts.PostLike
+    has_many :liked_posts, through: [:post_likes, :post]
 
     timestamps(type: :utc_datetime)
   end

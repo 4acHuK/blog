@@ -1,11 +1,8 @@
-<.header>
-  Posts
-  <:actions>
-    <.link patch={~p"/posts/new"}>
-      <.button>New Post</.button>
-    </.link>
-  </:actions>
-</.header>
+<div class="flex justify-center max-w-xl mx-auto space-y-6">
+  <.link patch={~p"/posts/new"}>
+    <.button class="w-48 justify-center mb-6">New Post</.button>
+  </.link>
+</div>
 
 <div class="max-w-xl mx-auto space-y-6">
   <%= for {_id, post} <- @streams.posts do %>
@@ -23,6 +20,28 @@
         <img src={Blog.Posts.get_post_image_url(post) || "/images/no_image.png"} alt="Post image" class="w-full object-cover max-h-[500px]" />
       </.link>
 
+      <div>
+        <%= if @current_user do %>
+          <%= if Blog.Posts.liked_by_user?(@current_user, post) do %>
+            <div class="px-4 py-2">
+              <button phx-click="unlike" phx-value-id={post.id}>
+                <img src={"/images/liked.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
+              </button>
+              <%= post.likes_count %>
+            </div>
+          <% else %>
+            <div class="px-4 py-2">
+              <button phx-click="like" phx-value-id={post.id}>
+                <img src={"/images/not_liked.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
+              </button>
+              <%= post.likes_count %>
+            </div>
+          <% end %>
+        <% end %>
+
+        <%!-- <span><%= post.likes_count %></span> --%>
+      </div>
+
       <!-- Description -->
       <div class="px-4 py-2">
         <p class="text-gray-800">
@@ -31,11 +50,12 @@
         </p>
       </div>
 
+      <div class="px-4 py-2">
+        <div class="text-sm text-gray-500"><%= post.inserted_at %></div>
+      </div>
+
 
       <%= if @current_user && @current_user.id == post.user_id do %>
-        <div class="ml-3">
-          <div class="text-sm text-gray-500"><%= post.inserted_at %></div>
-        </div>
         <div class="px-4 pb-3 text-right space-x-2">
           <.link patch={~p"/posts/#{post}/edit"} class="text-sm text-blue-500 hover:underline">Edit</.link>
           <.link phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{post.id}")} data-confirm="Are you sure?" class="text-sm text-blue-500 hover:underline">Delete</.link>

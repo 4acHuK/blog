@@ -1,43 +1,19 @@
 defmodule BlogWeb.PostLive.Index do
   use BlogWeb, :live_view
 
+  alias Blog.Repo
   alias Blog.Posts
   alias Blog.Posts.Post
   alias Blog.Accounts
 
   @impl true
   def mount(_params, session, socket) do
-
-
-#    user_token = session["user_token"]
-#    current_user = Accounts.get_user_by_session_token(user_token)
-
     with user_token <- session["user_token"],
          current_user <- Accounts.get_user_by_session_token(user_token) do
       {:ok, stream(socket |> assign(:current_user, current_user), :posts, Posts.list_posts_with_users())}
     else
       _ -> {:ok, stream(socket, :posts, Posts.list_posts_with_users())}
     end
-
-
-#           |> assign(:post_image_url, get_post_image_url(post))}
-
-#    case session["user_token"] do
-#      nil ->
-#        {:ok, stream(socket, :posts, Posts.list_posts_with_users())}
-#
-#      token ->
-#        case Accounts.get_user_by_session_token(token) do
-#          %Accounts.User{} = user ->
-#            socket = assign(socket, :current_user, user)
-#            {:ok, stream(socket, :posts, Posts.list_posts_with_users())}
-#
-#          _ ->
-#            {:ok, stream(socket, :posts, Posts.list_posts_with_users())}
-#        end
-#    end
-
-#    {:ok, stream(socket |> assign(:current_user, current_user), :posts, Posts.list_posts_with_users())}
   end
 
   @impl true
@@ -74,5 +50,21 @@ defmodule BlogWeb.PostLive.Index do
     {:ok, _} = Posts.delete_post(post)
 
     {:noreply, stream_delete(socket, :posts, post)}
+  end
+
+  @impl true
+  def handle_event("like", %{"id" => post_id}, socket) do
+    post = Posts.get_post!(post_id)
+    {_, post} = Posts.like_post(socket.assigns.current_user, post)
+
+    {:noreply, stream_insert(socket, :posts, post |> Repo.preload(:user))}
+  end
+
+  @impl true
+  def handle_event("unlike", %{"id" => post_id}, socket) do
+    post = Posts.get_post!(post_id)
+    {_, post} = Posts.unlike_post(socket.assigns.current_user, post)
+
+    {:noreply, stream_insert(socket, :posts, post |> Repo.preload(:user))}
   end
 end

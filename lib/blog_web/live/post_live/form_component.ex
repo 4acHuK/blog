@@ -56,12 +56,9 @@ defmodule BlogWeb.PostLive.FormComponent do
     uploaded_files =
       consume_uploaded_entries(socket, :image, fn %{path: path}, entry ->
         # Add the file extension to the temp file
-#        dest = Path.join(Application.app_dir(:my_app, "priv/static/uploads/post_images"), Path.basename(path))
         path_with_extension = path <> String.replace(entry.client_type, "image/", ".")
         File.cp!(path, path_with_extension)
-#        File.cp!(path, dest)
         {:ok, path_with_extension}
-#        {:ok, dest}
       end)
 
     file_path = List.first(uploaded_files)
@@ -73,8 +70,6 @@ defmodule BlogWeb.PostLive.FormComponent do
         post_params
       end
 
-#    save_post(socket, socket.assigns.action, post_params)
-#    save_post(socket, socket.assigns.action, Map.put(post_params, "image", file_path))
     save_post(socket, socket.assigns.action, updated_params)
   end
 
@@ -86,7 +81,7 @@ defmodule BlogWeb.PostLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Post updated successfully")
-         |> push_redirect(to: socket.assigns.patch)}
+         |> push_navigate(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -101,7 +96,7 @@ defmodule BlogWeb.PostLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Post created successfully")
-         |> push_redirect(to: socket.assigns.patch)}
+         |> push_navigate(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}

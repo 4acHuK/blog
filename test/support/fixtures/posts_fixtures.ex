@@ -4,7 +4,7 @@ defmodule Blog.PostsFixtures do
   entities via the `Blog.Posts` context.
   """
 
-  import Blog.AccountsFixtures, only: [user_fixture: 0, valid_user_attributes: 0]
+  import Blog.AccountsFixtures
 
   @doc """
   Generate a post.
@@ -12,14 +12,16 @@ defmodule Blog.PostsFixtures do
   def post_fixture(attrs \\ %{}) do
     user = user_fixture()
 
-    {:ok, post} =
+    post_attrs =
       attrs
       |> Enum.into(%{
         description: "some description",
         title: "some title",
-        user_id: user.id
+        user_id: user.id,
+        likes_count: 0
       })
-      |> Blog.Posts.create_post()
+
+    {:ok, post} = Blog.Posts.create_post(user, post_attrs)
 
     post
   end
