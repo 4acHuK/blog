@@ -10,7 +10,6 @@ defmodule BlogWeb.PostLive.Show do
          current_user <- Accounts.get_user_by_session_token(user_token) do
       {:ok, socket |> assign(:current_user, current_user)}
     else
-#      _ -> {:ok, stream(socket, :posts, Posts.list_posts_with_users())}
       _ -> {:ok, socket}
     end
   end
