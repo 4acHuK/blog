@@ -226,6 +226,8 @@ defmodule Blog.Accounts do
     token
   end
 
+  def get_user_by_session_token(nil), do: nil
+
   @doc """
   Gets the user with the given signed token.
   """
