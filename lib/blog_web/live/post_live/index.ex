@@ -70,20 +70,4 @@ defmodule BlogWeb.PostLive.Index do
 
     {:noreply, stream_insert(socket, :posts, post |> Repo.preload(:user))}
   end
-
-  @impl true
-  def handle_event("favorite", %{"id" => post_id}, socket) do
-    post = Posts.get_post!(post_id)
-    {:ok, post} = Posts.favorite_post(socket.assigns.current_user, post)
-
-    {:noreply, stream_insert(socket, :posts, post |> Repo.preload(:user))}
-  end
-
-  @impl true
-  def handle_event("unfavorite", %{"id" => post_id}, socket) do
-    post = Posts.get_post!(post_id)
-    {_, post} = Posts.unfavorite_post(socket.assigns.current_user, post)
-
-    {:noreply, stream_insert(socket, :posts, post |> Repo.preload(:user))}
-  end
 end

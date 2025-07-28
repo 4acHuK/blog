@@ -275,9 +275,11 @@ defmodule Blog.Posts do
 
   """
   def list_favorite_posts(user) do
-    user
-    |> Repo.preload(:favorite_posts)
-    |> Map.get(:favorite_posts)
-    |> Repo.preload(:user)
+    from(p in Post,
+      join: f in assoc(p, :favorited_users),
+      where: f.id == ^user.id,
+      preload: [:user]
+    )
+    |> Repo.all()
   end
 end

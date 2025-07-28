@@ -21,9 +21,9 @@ defmodule BlogWeb.PostLive.Favorites do
   @impl true
   def handle_event("unfavorite", %{"id" => post_id}, socket) do
     post = Posts.get_post!(post_id)
-    Posts.unfavorite_post(socket.assigns.current_user, post)
+    {_, post} = Posts.unfavorite_post(socket.assigns.current_user, post)
 
-    {:noreply, stream_insert(socket, :posts, post |> Repo.preload(:user))}
+    {:noreply, stream_delete(socket, :posts, post)}
   end
 
   @impl true

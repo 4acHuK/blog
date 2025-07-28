@@ -20,40 +20,12 @@
         <img src={Blog.Posts.get_post_image_url(post) || "/images/no_image.png"} alt="Post image" class="w-full object-cover max-h-[500px]" />
       </.link>
 
-      <%= if @current_user do %>
-        <div class="flex">
-          <%= if Posts.liked_by_user?(@current_user, post) do %>
-            <div class="px-2 py-2">
-              <button phx-click="unlike" phx-value-id={post.id}>
-                <img src={"/images/liked.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
-                <%= post.likes_count %>
-              </button>
-            </div>
-          <% else %>
-            <div class="px-2 py-2">
-              <button phx-click="like" phx-value-id={post.id}>
-                <img src={"/images/not_liked.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
-                <%= post.likes_count %>
-              </button>
-            </div>
-          <% end %>
-
-
-          <%= if Posts.favorite?(@current_user, post) do %>
-            <div class="px-2 py-2">
-              <button phx-click="unfavorite" phx-value-id={post.id}>
-                <img src={"/images/favorited.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
-              </button>
-            </div>
-          <% else %>
-            <div class="px-2 py-2">
-              <button phx-click="favorite" phx-value-id={post.id}>
-                <img src={"/images/not_favorited.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
-              </button>
-            </div>
-          <% end %>
-        </div>
-      <% end %>
+      <.live_component
+        module={BlogWeb.Components.PostActionsComponent}
+        id={"post-actions-#{post.id}"}
+        post={post}
+        current_user={@current_user}
+      />
 
       <!-- Description -->
       <div class="px-4 py-2">
