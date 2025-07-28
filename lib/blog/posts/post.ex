@@ -12,6 +12,8 @@ defmodule Blog.Posts.Post do
     belongs_to :user, Blog.Accounts.User
     has_many :post_likes, Blog.Posts.PostLike
     has_many :liked_users, through: [:post_likes, :user]
+    has_many :post_favorites, Blog.Posts.PostFavorite
+    has_many :favorited_users, through: [:post_favorites, :user]
 
     timestamps(type: :utc_datetime)
   end

@@ -21,22 +21,25 @@ defmodule BlogWeb.PostLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :edit, %{"id" => id}) do
+  defp apply_action(socket, :edit, %{"id" => id, "return_to" => return_to}) do
     socket
     |> assign(:page_title, "Edit Post")
     |> assign(:post, Posts.get_post!(id))
+    |> assign(:return_to, return_to)
   end
 
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Post")
     |> assign(:post, %Post{})
+    |> assign(:return_to, "/")
   end
 
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "Listing Posts")
     |> assign(:post, nil)
+    |> assign(:return_to, "/")
   end
 
   @impl true
@@ -64,6 +67,22 @@ defmodule BlogWeb.PostLive.Index do
   def handle_event("unlike", %{"id" => post_id}, socket) do
     post = Posts.get_post!(post_id)
     {_, post} = Posts.unlike_post(socket.assigns.current_user, post)
+
+    {:noreply, stream_insert(socket, :posts, post |> Repo.preload(:user))}
+  end
+
+  @impl true
+  def handle_event("favorite", %{"id" => post_id}, socket) do
+    post = Posts.get_post!(post_id)
+    {:ok, post} = Posts.favorite_post(socket.assigns.current_user, post)
+
+    {:noreply, stream_insert(socket, :posts, post |> Repo.preload(:user))}
+  end
+
+  @impl true
+  def handle_event("unfavorite", %{"id" => post_id}, socket) do
+    post = Posts.get_post!(post_id)
+    {_, post} = Posts.unfavorite_post(socket.assigns.current_user, post)
 
     {:noreply, stream_insert(socket, :posts, post |> Repo.preload(:user))}
   end

@@ -6,9 +6,7 @@ defmodule Blog.Posts do
   import Ecto.Query, warn: false
   import Ecto.Changeset
   alias Blog.Repo
-
-  alias Blog.Posts.Post
-  alias Blog.Posts.PostLike
+  alias Blog.Posts.{Post, PostLike, PostFavorite}
 
   @doc """
   Returns the list of posts.
@@ -212,5 +210,74 @@ defmodule Blog.Posts do
   """
   def liked_by_user?(user, post) do
     Repo.exists?(from l in PostLike, where: l.user_id == ^user.id and l.post_id == ^post.id)
+  end
+
+  @doc """
+  Adds post to user's favorites
+
+  ## Examples
+
+      iex> favorite_post(user, post)
+      {:ok, %Post{}}
+
+  """
+  def favorite_post(user, post) do
+    %PostFavorite{}
+    |> PostFavorite.changeset(%{user_id: user.id, post_id: post.id})
+    |> Repo.insert()
+    |> case do
+         {:ok, _favorite} -> {:ok, post}
+         {:error, _} = err -> err
+       end
+  end
+
+  @doc """
+  Removes post from user's favorites
+
+  ## Examples
+
+      iex> unfavorite_post(user, post)
+      {:ok, %Post{}}
+
+  """
+  def unfavorite_post(user, post) do
+    Repo.get_by(PostFavorite, user_id: user.id, post_id: post.id)
+    |> case do
+         nil -> {:error, :not_found}
+         favorite ->
+           Repo.delete(favorite)
+           {:ok, post}
+       end
+  end
+
+  @doc """
+  Checks if post in user's favorites
+
+  ## Examples
+
+      iex> favorite?(user, post)
+      true
+      iex> favorite?(user, post)
+      false
+
+  """
+  def favorite?(user, post) do
+    Repo.exists?(from f in PostFavorite, where: f.user_id == ^user.id and f.post_id == ^post.id)
+  end
+
+  @doc """
+  Returns the list of user favorite posts
+
+  ## Examples
+
+      iex> list_favorite_posts(user)
+      [%Post{}, ...]
+
+  """
+  def list_favorite_posts(user) do
+    user
+    |> Repo.preload(:favorite_posts)
+    |> Map.get(:favorite_posts)
+    |> Repo.preload(:user)
   end
 end
