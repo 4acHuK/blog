@@ -4,9 +4,12 @@
   </.link>
 </div>
 
-<div class="max-w-xl mx-auto space-y-6">
-  <%= for {_id, post} <- @streams.posts do %>
-    <div id="#{post.id}" class="bg-white rounded-xl shadow-md border">
+<div id="posts" class="max-w-xl mx-auto space-y-6" phx-update="stream">
+  <div id="posts-empty" class="only:block hidden">
+    <p>There is no posts. Be first and crete your own posts</p>
+  </div>
+  <%= for {id, post} <- @streams.posts do %>
+    <div id={id} class="bg-white rounded-xl shadow-md border">
       <!-- Header: User Info -->
       <div class="flex items-center p-4">
         <div class="ml-3">
