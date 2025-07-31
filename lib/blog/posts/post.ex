@@ -10,11 +10,11 @@ defmodule Blog.Posts.Post do
     field :likes_count, :integer
 
     belongs_to :user, Blog.Accounts.User
-    has_many :post_likes, Blog.Posts.PostLike
+    has_many :post_likes, Blog.Posts.PostLike, on_delete: :delete_all
     has_many :liked_users, through: [:post_likes, :user]
-    has_many :post_favorites, Blog.Posts.PostFavorite
+    has_many :post_favorites, Blog.Posts.PostFavorite, on_delete: :delete_all
     has_many :favorited_users, through: [:post_favorites, :user]
-    has_many :post_comments, Blog.Posts.Comment
+    has_many :post_comments, Blog.Posts.PostComment, on_delete: :delete_all
 
     timestamps(type: :utc_datetime)
   end

@@ -41,4 +41,12 @@ defmodule BlogWeb.PostLive.Favorites do
 
     {:noreply, stream_insert(socket, :posts, post |> Repo.preload(:user))}
   end
+
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do
+    post = Posts.get_post!(id)
+    {:ok, _} = Posts.delete_post(post)
+
+    {:noreply, stream_delete(socket, :posts, post)}
+  end
 end
