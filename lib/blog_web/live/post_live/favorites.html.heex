@@ -2,80 +2,77 @@
  <.back navigate={~p"/"}>Back to posts</.back>
 </div>
 
-<%= if @streams.posts == [] do %>
-  <div class="max-w-xl mx-auto space-y-6">
-    <p>You have no favorite posts yet.</p>
+<div id="posts" class="max-w-xl mx-auto space-y-6" phx-update="stream">
+  <div id="posts-empty" class="only:block hidden">
+    <p>You have no favorite posts yet</p>
   </div>
-<% else %>
-    <div class="max-w-xl mx-auto space-y-6">
-      <%= for {id, post} <- @streams.posts do %>
-        <div id={id} class="bg-white rounded-xl shadow-md border">
-          <!-- Header: User Info -->
-          <div class="flex items-center p-4">
-            <div class="ml-3">
-              <div class="font-semibold text-gray-900"><%= post.user.email %></div>
+  <%= for {id, post} <- @streams.posts do %>
+    <div id={id} class="bg-white rounded-xl shadow-md border">
+      <!-- Header: User Info -->
+      <div class="flex items-center p-4">
+        <div class="ml-3">
+          <div class="font-semibold text-gray-900"><%= post.user.email %></div>
+        </div>
+        <div class="ml-12"><%= post.title %></div>
+      </div>
+
+      <!-- Image -->
+      <.link navigate={~p"/posts/#{post}"}>
+        <img src={Blog.Posts.get_post_image_url(post) || "/images/no_image.png"} alt="Post image" class="w-full object-cover max-h-[500px]" />
+      </.link>
+
+      <%= if @current_user do %>
+        <div class="flex">
+          <%= if Posts.liked_by_user?(@current_user, post) do %>
+            <div class="px-2 py-2">
+              <button phx-click="unlike" phx-value-id={post.id}>
+                <img src={"/images/liked.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
+                <%= post.likes_count %>
+              </button>
             </div>
-            <div class="ml-12"><%= post.title %></div>
-          </div>
-
-          <!-- Image -->
-          <.link navigate={~p"/posts/#{post}"}>
-            <img src={Blog.Posts.get_post_image_url(post) || "/images/no_image.png"} alt="Post image" class="w-full object-cover max-h-[500px]" />
-          </.link>
-
-          <%= if @current_user do %>
-            <div class="flex">
-              <%= if Posts.liked_by_user?(@current_user, post) do %>
-                <div class="px-2 py-2">
-                  <button phx-click="unlike" phx-value-id={post.id}>
-                    <img src={"/images/liked.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
-                    <%= post.likes_count %>
-                  </button>
-                </div>
-              <% else %>
-                <div class="px-2 py-2">
-                  <button phx-click="like" phx-value-id={post.id}>
-                    <img src={"/images/not_liked.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
-                    <%= post.likes_count %>
-                  </button>
-                </div>
-              <% end %>
-
-              <%= if Posts.favorite?(@current_user, post) do %>
-                <div class="px-2 py-2">
-                  <button phx-click="unfavorite" phx-value-id={post.id}>
-                    <img src={"/images/favorited.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
-                  </button>
-                </div>
-              <% else %>
-                <div class="px-2 py-2">
-                  <button phx-click="favorite" phx-value-id={post.id}>
-                    <img src={"/images/not_favorited.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
-                  </button>
-                </div>
-              <% end %>
+          <% else %>
+            <div class="px-2 py-2">
+              <button phx-click="like" phx-value-id={post.id}>
+                <img src={"/images/not_liked.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
+                <%= post.likes_count %>
+              </button>
             </div>
           <% end %>
 
-          <!-- Description -->
-          <div class="px-4 py-2">
-            <p class="text-gray-800">
-              <span class="font-semibold"><%= post.user.email %></span>
-              <%= post.description %>
-            </p>
-          </div>
-
-          <div class="px-4 py-2">
-            <div class="text-sm text-gray-500"><%= post.inserted_at %></div>
-          </div>
-
-          <%= if @current_user && @current_user.id == post.user_id do %>
-            <div class="px-4 pb-3 text-right space-x-2">
-              <.link patch={~p"/posts/#{post}/edit?return_to=/favorites"} class="text-sm text-blue-500 hover:underline">Edit</.link>
-              <.link phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{post.id}")} data-confirm="Are you sure?" class="text-sm text-blue-500 hover:underline">Delete</.link>
+          <%= if Posts.favorite?(@current_user, post) do %>
+            <div class="px-2 py-2">
+              <button phx-click="unfavorite" phx-value-id={post.id}>
+                <img src={"/images/favorited.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
+              </button>
+            </div>
+          <% else %>
+            <div class="px-2 py-2">
+              <button phx-click="favorite" phx-value-id={post.id}>
+                <img src={"/images/not_favorited.png"} class="w-full object-cover max-h-[20px] max-h-[20px]" />
+              </button>
             </div>
           <% end %>
         </div>
       <% end %>
+
+      <!-- Description -->
+      <div class="px-4 py-2">
+        <p class="text-gray-800">
+          <span class="font-semibold"><%= post.user.email %></span>
+          <%= post.description %>
+        </p>
+      </div>
+
+      <div class="px-4 py-2">
+        <div class="text-sm text-gray-500"><%= post.inserted_at %></div>
+      </div>
+
+      <%= if @current_user && @current_user.id == post.user_id do %>
+        <div class="px-4 pb-3 text-right space-x-2">
+          <.link patch={~p"/posts/#{post}/edit?return_to=/favorites"} class="text-sm text-blue-500 hover:underline">Edit</.link>
+          <.link phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{post.id}")} data-confirm="Are you sure?" class="text-sm text-blue-500 hover:underline">Delete</.link>
+        </div>
+      <% end %>
     </div>
-<% end %>
+  <% end %>
+</div>
