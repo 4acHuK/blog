@@ -72,6 +72,8 @@ defmodule BlogWeb.Router do
       live "/posts/:id/edit", PostLive.Index, :edit
       live "/posts/:id/show/edit", PostLive.Show, :edit
       live "/favorites", PostLive.Favorites, :index
+      live "/posts/:id/comment/:id/edit", PostLive.Index, :edit
+      live "/posts/:id/comment/new", PostLive.Index, :edit
     end
   end
 

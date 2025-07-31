@@ -39,6 +39,11 @@ defmodule BlogWeb.Components.PostActionsComponent do
               </button>
             </div>
           <% end %>
+          <div class="px-2 py-2">
+            <button class="comments-icon">
+              <img src="/images/comment.png" class="w-full object-cover max-h-[20px]" />
+            </button>
+          </div>
         </div>
       <% end %>
     </div>

@@ -14,6 +14,7 @@ defmodule Blog.Accounts.User do
     has_many :liked_posts, through: [:post_likes, :post]
     has_many :post_favorites, Blog.Posts.PostFavorite
     has_many :favorite_posts, through: [:post_favorites, :post]
+    has_many :post_comments, Blog.Posts.Comment
 
     timestamps(type: :utc_datetime)
   end
