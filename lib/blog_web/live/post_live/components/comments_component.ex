@@ -10,9 +10,11 @@ defmodule BlogWeb.Live.PostLive.Components.CommentsComponent do
 
     ~H"""
     <div class="text-center">
-      <.link patch={~p"/posts/#{@post}/#{@source}/post_comments/new"}>
-        <.button class="w-48 mb-6">Add Comment</.button>
-      </.link>
+      <%= if @current_user do %>
+        <.link patch={~p"/posts/#{@post}/#{@source}/post_comments/new"}>
+          <.button class="w-48 mb-6">Add Comment</.button>
+        </.link>
+      <% end %>
       <div id={"post_comments_#{@post.id}"} phx-update="stream">
         <div id={"post_comments_#{@post.id}-empty"} class="only:block hidden p-2">
           <p>There is no comments yet</p>
@@ -21,7 +23,7 @@ defmodule BlogWeb.Live.PostLive.Components.CommentsComponent do
           <div id={id} class="border p-2 rounded-md">
             <p class="text-sm"><%= comment.body %></p>
             <p class="text-xs text-gray-500"><%= comment.user.email %> • <%= comment.inserted_at %></p>
-            <%= if PostComments.created_by_user?(@current_user, comment) do %>
+            <%= if @current_user && PostComments.created_by_user?(@current_user, comment) do %>
               <div class="px-4 pb-3 text-right space-x-2">
                 <.link patch={~p"/posts/#{@post}/#{@source}/post_comments/#{comment}/edit"} class="text-sm text-blue-500 hover:underline">Edit</.link>
                 <.link phx-click="delete_comment" phx-value-id={comment.id} phx-target={@myself} data-confirm="Are you sure?" class="text-sm text-blue-500 hover:underline">Delete</.link>

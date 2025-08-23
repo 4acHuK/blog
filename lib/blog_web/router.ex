@@ -17,14 +17,15 @@ defmodule BlogWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", BlogWeb do
-    pipe_through :browser
-
-    live_session :default do
-      live "/", PostLive.Index, :index
-      live "/posts/:id", PostLive.Show, :show
-    end
-  end
+#  scope "/", BlogWeb do
+#    pipe_through :browser
+#
+#    live_session :public,
+#                 on_mount: [{BlogWeb.UserAuth, :mount_current_user}] do
+#      live "/", PostLive.Index, :index
+#      live "/posts/:id", PostLive.Show, :show
+#    end
+#  end
 
   # Other scopes may use custom stacks.
   # scope "/api", BlogWeb do
@@ -54,7 +55,7 @@ defmodule BlogWeb.Router do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
     live_session :redirect_if_user_is_authenticated,
-      on_mount: [{BlogWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+                 on_mount: [{BlogWeb.UserAuth, :redirect_if_user_is_authenticated}] do
       live "/users/register", UserRegistrationLive, :new
       live "/users/log_in", UserLoginLive, :new
       live "/users/reset_password", UserForgotPasswordLive, :new
@@ -68,7 +69,7 @@ defmodule BlogWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :require_authenticated_user,
-      on_mount: [{BlogWeb.UserAuth, :ensure_authenticated}, {BlogWeb.UserAuth, :mount_current_user}] do
+                 on_mount: [{BlogWeb.UserAuth, :ensure_authenticated}, {BlogWeb.UserAuth, :mount_current_user}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
       live "/", PostLive.Index, :index
@@ -78,7 +79,7 @@ defmodule BlogWeb.Router do
       live "/posts/:id/show/edit", PostLive.Show, :edit
       live "/posts/:id/favorites/edit", PostLive.Favorites, :edit
       live "/favorites", PostLive.Favorites, :index
-      live "/posts/:post_id/post_comments/new", PostLive.Index, :new_post_comment
+      live "/posts/:post_id/index/post_comments/new", PostLive.Index, :new_post_comment
       live "/posts/:post_id/show/post_comments/new", PostLive.Show, :new_post_comment
       live "/posts/:post_id/favorites/post_comments/new", PostLive.Favorites, :new_post_comment
       live "/posts/:post_id/index/post_comments/:id/edit", PostLive.Index, :edit_post_comment
