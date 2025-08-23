@@ -1,26 +1,51 @@
 defmodule BlogWeb.PostLive.Show do
   use BlogWeb, :live_view
 
-  alias Blog.Repo
-  alias Blog.Posts
-  alias Blog.Accounts
+  alias Blog.{Repo, Posts, PostComments}
+  alias Blog.Posts.PostComment
 
   @impl true
-  def mount(_params, session, socket) do
-    with user_token <- session["user_token"],
-         current_user <- Accounts.get_user_by_session_token(user_token) do
-      {:ok, socket |> assign(:current_user, current_user)}
-    else
-      _ -> {:ok, socket}
-    end
+  def mount(_params, _session, socket) do
+    {:ok, socket}
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:post, Posts.get_post_with_user!(id))}
+  def handle_params(params, _url, socket) do
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
+  defp apply_action(socket, :edit, %{"id" => id}) do
+    socket
+    |> assign(:page_title, "Edit Post")
+    |> assign(:post, Posts.get_post_with_user!(id))
+  end
+
+  defp apply_action(socket, :show, %{"id" => id}) do
+    post = Posts.get_post_with_user!(id)
+    socket
+    |> assign(:post, post)
+  end
+
+  defp apply_action(socket, :new_post_comment, %{"post_id" => post_id}) do
+    socket
+    |> assign(:page_title, "New Post Comment")
+    |> assign(:post_comment, %PostComment{})
+    |> assign(:post, Posts.get_post_with_user!(post_id))
+  end
+
+  defp apply_action(socket, :edit_post_comment, %{"post_id" => post_id, "id" => id}) do
+    socket
+    |> assign(:page_title, "Edit Post Comment")
+    |> assign(:post_comment, PostComments.get_comment!(id))
+    |> assign(:post, Posts.get_post_with_user!(post_id))
+  end
+
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do
+    post = Posts.get_post!(id)
+    {:ok, _} = Posts.delete_post(post)
+
+    {:noreply, socket |> push_navigate(to: ~p"/")}
   end
 
   @impl true
@@ -38,7 +63,4 @@ defmodule BlogWeb.PostLive.Show do
 
     {:noreply, assign(socket, :post, post |> Repo.preload(:user))}
   end
-
-  defp page_title(:show), do: "Show Post"
-  defp page_title(:edit), do: "Edit Post"
 end

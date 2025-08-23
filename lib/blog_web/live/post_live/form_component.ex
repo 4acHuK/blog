@@ -39,11 +39,9 @@ defmodule BlogWeb.PostLive.FormComponent do
   @impl true
   def update(%{post: post} = assigns, socket) do
     {:ok,
-     socket
-     |> assign(assigns)
-     |> assign_new(:form, fn ->
-       to_form(Posts.change_post(post))
-     end)}
+      socket
+      |> assign(assigns)
+      |> assign(form: to_form(Posts.change_post(post)))}
   end
 
   @impl true
@@ -81,7 +79,7 @@ defmodule BlogWeb.PostLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Post updated successfully")
-         |> push_navigate(to: socket.assigns.patch)}
+         |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -96,7 +94,7 @@ defmodule BlogWeb.PostLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Post created successfully")
-         |> push_navigate(to: socket.assigns.patch)}
+         |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}

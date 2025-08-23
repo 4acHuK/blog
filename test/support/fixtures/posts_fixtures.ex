@@ -23,6 +23,6 @@ defmodule Blog.PostsFixtures do
 
     {:ok, post} = Blog.Posts.create_post(user, post_attrs)
 
-    post
+    post |> Blog.Repo.preload(:post_comments)
   end
 end

@@ -34,6 +34,7 @@ defmodule Blog.Posts do
     Post
     |> order_by(desc: :inserted_at)
     |> preload(:user)
+    |> preload(:post_comments)
     |> Repo.all()
   end
 
@@ -71,6 +72,7 @@ defmodule Blog.Posts do
     Post
     |> Repo.get!(id)
     |> Repo.preload(:user)
+    |> Repo.preload(:post_comments)
   end
 
   @doc """
@@ -278,7 +280,8 @@ defmodule Blog.Posts do
     from(p in Post,
       join: f in assoc(p, :favorited_users),
       where: f.id == ^user.id,
-      preload: [:user]
+      preload: [:user],
+      preload: [:post_comments]
     )
     |> Repo.all()
   end

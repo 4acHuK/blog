@@ -4,6 +4,7 @@ defmodule Blog.PostComments do
   """
 
   import Ecto.Query, warn: false
+  import Ecto.Changeset
 
   alias Blog.Repo
   alias Blog.Posts.PostComment
@@ -28,9 +29,11 @@ defmodule Blog.PostComments do
   @doc """
   Creates a comment.
   """
-  def create_comment(attrs \\ %{}) do
+  def create_comment(user, post, attrs \\ %{}) do
     %PostComment{}
     |> PostComment.changeset(attrs)
+    |> put_assoc(:user, user)
+    |> put_assoc(:post, post)
     |> Repo.insert()
   end
 
@@ -55,5 +58,20 @@ defmodule Blog.PostComments do
   """
   def change_comment(%PostComment{} = comment, attrs \\ %{}) do
     PostComment.changeset(comment, attrs)
+  end
+
+  @doc """
+  Checks if comment created by user
+
+  ## Examples
+
+      iex> created_by_user?(user, comment)
+      true
+      iex> created_by_user?(user, comment)
+      false
+
+  """
+  def created_by_user?(user, comment) do
+    comment.user_id == user.id
   end
 end

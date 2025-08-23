@@ -17,9 +17,10 @@ defmodule Blog.Posts.PostComment do
   @doc false
   def changeset(comment, attrs) do
     comment
-    |> cast(attrs, [:body, :user_id, :post_id])
-    |> validate_required([:body, :user_id, :post_id])
+    |> cast(attrs, [:body])
+    |> validate_required([:body])
     |> assoc_constraint(:user)
     |> assoc_constraint(:post)
+    |> validate_length(:body, max: 100)
   end
 end

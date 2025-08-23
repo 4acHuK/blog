@@ -1,4 +1,4 @@
-defmodule BlogWeb.Components.PostActionsComponent do
+defmodule BlogWeb.Live.PostLive.Components.PostActionsComponent do
   use BlogWeb, :live_component
 
   alias Blog.Repo
@@ -65,6 +65,4 @@ defmodule BlogWeb.Components.PostActionsComponent do
 
     {:noreply, assign(socket, :post, post |> Repo.preload([:user, :post_favorites]))}
   end
-
-
 end

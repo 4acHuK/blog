@@ -1,21 +1,41 @@
 defmodule BlogWeb.PostLive.Favorites do
   use BlogWeb, :live_view
 
-  alias Blog.Repo
-  alias Blog.Posts
-  alias Blog.Accounts
+  alias Blog.{Repo, Posts, PostComments}
+  alias Blog.Posts.PostComment
 
   @impl true
-  def mount(_params, session, socket) do
-    user_token = session["user_token"]
-    current_user = Accounts.get_user_by_session_token(user_token)
+  def mount(_params, _session, socket) do
+    {:ok, stream(socket, :posts, Posts.list_favorite_posts(socket.assigns.current_user))}
+  end
 
-    if current_user do
-      posts = Posts.list_favorite_posts(current_user)
-      {:ok, stream(socket |> assign(:current_user, current_user), :posts, posts)}
-    else
-      {:ok, redirect(socket, to: ~p"/users/log_in")}
-    end
+  @impl true
+  def handle_params(params, _url, socket) do
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
+  defp apply_action(socket, :index, _params) do
+    socket
+  end
+
+  defp apply_action(socket, :edit, %{"id" => id}) do
+    socket
+    |> assign(:page_title, "Edit Post")
+    |> assign(:post, Posts.get_post_with_user!(id))
+  end
+
+  defp apply_action(socket, :new_post_comment, %{"post_id" => post_id}) do
+    socket
+    |> assign(:page_title, "New Post Comment")
+    |> assign(:post_comment, %PostComment{})
+    |> assign(:post, Posts.get_post!(post_id))
+  end
+
+  defp apply_action(socket, :edit_post_comment, %{"post_id" => post_id, "id" => id}) do
+    socket
+    |> assign(:page_title, "Edit Post Comment")
+    |> assign(:post_comment, PostComments.get_comment!(id))
+    |> assign(:post, Posts.get_post!(post_id))
   end
 
   @impl true

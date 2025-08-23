@@ -20,7 +20,10 @@ defmodule BlogWeb.Router do
   scope "/", BlogWeb do
     pipe_through :browser
 
-    live "/", PostLive.Index, :index
+    live_session :default do
+      live "/", PostLive.Index, :index
+      live "/posts/:id", PostLive.Show, :show
+    end
   end
 
   # Other scopes may use custom stacks.
@@ -65,15 +68,22 @@ defmodule BlogWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :require_authenticated_user,
-      on_mount: [{BlogWeb.UserAuth, :ensure_authenticated}] do
+      on_mount: [{BlogWeb.UserAuth, :ensure_authenticated}, {BlogWeb.UserAuth, :mount_current_user}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+      live "/", PostLive.Index, :index
       live "/posts/new", PostLive.Index, :new
+      live "/posts/:id", PostLive.Show, :show
       live "/posts/:id/edit", PostLive.Index, :edit
       live "/posts/:id/show/edit", PostLive.Show, :edit
+      live "/posts/:id/favorites/edit", PostLive.Favorites, :edit
       live "/favorites", PostLive.Favorites, :index
-      live "/posts/:id/comment/:id/edit", PostLive.Index, :edit
-      live "/posts/:id/comment/new", PostLive.Index, :edit
+      live "/posts/:post_id/post_comments/new", PostLive.Index, :new_post_comment
+      live "/posts/:post_id/show/post_comments/new", PostLive.Show, :new_post_comment
+      live "/posts/:post_id/favorites/post_comments/new", PostLive.Favorites, :new_post_comment
+      live "/posts/:post_id/index/post_comments/:id/edit", PostLive.Index, :edit_post_comment
+      live "/posts/:post_id/show/post_comments/:id/edit", PostLive.Show, :edit_post_comment
+      live "/posts/:post_id/favorites/post_comments/:id/edit", PostLive.Favorites, :edit_post_comment
     end
   end
 
@@ -81,10 +91,9 @@ defmodule BlogWeb.Router do
     pipe_through [:browser]
 
     delete "/users/log_out", UserSessionController, :delete
-    live "/posts/:id", PostLive.Show, :show
 
     live_session :current_user,
-      on_mount: [{BlogWeb.UserAuth, :mount_current_user}] do
+                 on_mount: [{BlogWeb.UserAuth, :mount_current_user}] do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
